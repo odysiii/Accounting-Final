@@ -1,0 +1,12 @@
+Salaries Expense
+Wages Expense
+Rent Expense
+Utilities Expense
+Supplies Expense
+Depreciation Expense
+Insurance Expense
+Interest Expense
+Advertising Expense
+Repairs and Maintenance Expense
+Miscellaneous Expense
+Cost of Goods Sold

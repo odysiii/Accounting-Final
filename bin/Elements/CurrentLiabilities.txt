@@ -1,0 +1,6 @@
+Accounts Payable
+Salaries Payable
+Wages Payable
+Interest Payable
+Taxes Payable
+Unearned Revenue

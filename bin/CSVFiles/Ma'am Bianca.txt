@@ -1,0 +1,4 @@
+Oct 30,Cash,1000000.0,Capital,1000000.0,To record initial investment
+Oct  30,Cost of Goods Sold,200000.0,Inventories,200000.0,To record cost of goods sold
+Oct  30,Cash,500000.0,Sales,500000.0,To record sales.
+oct 30 ,Utilities Expense,10000.0,Cash,10000.0,To record payment of bills
