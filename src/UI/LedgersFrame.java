@@ -4,108 +4,103 @@ import javax.swing.*;
 import Backend.AccountTitle;
 
 import java.awt.*;
-import java.io.File;
 import java.util.HashMap;
 
-public class LedgersFrame extends TabFrame{
-
-    private static Font poppins = loadFont(GetPath.getPath() + "Poppins-Bold.ttf", 15f);
-    private static Font poppins1 = loadFont(GetPath.getPath() + "Poppins-SemiBold.ttf", 12f);
-    private static Font poppins2 = loadFont(GetPath.getPath() + "Poppins-Medium.ttf", 12f);
-    
-
-    public static Font loadFont(String path, float size) {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            return font;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; 
-        }
-    }
+public class LedgersFrame extends JPanel{
 
     public LedgersFrame(HashMap<String, AccountTitle> accounts, Journalizing journalizing){
-        super("Ledgers", journalizing);
-        for (JButton button : this.getAllButtons()) {
-            button.addActionListener(e -> this.dispose());
-        }
-        this.removeActionListener(getLedgersTab());
 
-        JPanel center = new JPanel();
-        center.setLayout(new FlowLayout(FlowLayout.LEFT,30,30));
-        center.setBorder(BorderFactory.createEmptyBorder(50,30,50,30));
+        setOpaque(false);
+        setLayout(new BorderLayout());
 
-        int numberofAccounts = accounts.size();
-        int rows = (int) Math.ceil(numberofAccounts / 5.0);
-        center.setPreferredSize(new Dimension(5 * 200 + 4 * 30, rows * 200 + (rows - 1) * 30));
+        JPanel center = new ScrollPanel(new ScrollPanel.WrapLayout(FlowLayout.LEFT, 22, 22));
+        center.setBorder(BorderFactory.createEmptyBorder(18, 26, 18, 26));
 
         for (AccountTitle accountTitle : accounts.values()) {
             center.add(createTAccount(accountTitle));
         }
 
         JScrollPane centerScrollPane = new JScrollPane(center);
+        Theme.slim(centerScrollPane);
         centerScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         centerScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        centerScrollPane.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         add(centerScrollPane, BorderLayout.CENTER);
     }
 
     public static JPanel createTAccount(AccountTitle accountTitle){
-        JPanel tAccount = new JPanel(new BorderLayout());
-        tAccount.setPreferredSize(new Dimension(150,150));
-        tAccount.setMaximumSize(new Dimension(150,150));
-        tAccount.setMinimumSize(new Dimension(150,150));
-            JLabel title = new JLabel(accountTitle.getTitle(), SwingConstants.CENTER);
-            title.setFont(poppins);
+        int rows = Math.max(2, Math.max(accountTitle.getDebitValues().size(), accountTitle.getCreditValues().size()));
+        int shadow = 10;
+
+        RoundedPanel tAccount = new RoundedPanel();
+        tAccount.setLayout(new BorderLayout());
+        tAccount.setBackground(Color.WHITE);
+        tAccount.setCornerRadius(30);
+        tAccount.setShadowSize(shadow);
+        tAccount.setClipChildren(true);
+        tAccount.setPreferredSize(new Dimension(250 + 2 * shadow, 40 + 16 + rows * 26 + 40 + 2 * shadow));
+
+            JLabel title = new JLabel(accountTitle.getTitle());
+            title.setFont(Theme.inter(Font.BOLD, 13f));
+            title.setForeground(Color.WHITE);
             title.setOpaque(true);
-            title.setPreferredSize(new Dimension(150,25));
-            title.setBackground(new Color(0x7db1ff));
+            title.setBackground(Theme.BLUE);
+            title.setPreferredSize(new Dimension(250, 40));
+            title.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 12));
             tAccount.add(title, BorderLayout.NORTH);
-        
-            JPanel body = new JPanel(new GridLayout(0,2));
-                
-               int maxIndex = Math.max(accountTitle.getDebitValues().size(), accountTitle.getCreditValues().size());
 
-                for (int i = 0; i < maxIndex; i++) {
-                    // Debit cell
-                    if (i < accountTitle.getDebitValues().size()) {
-                        body.add(makecell(String.valueOf(accountTitle.getDebitValues().get(i)), new Color(0xbfecac)));
-                    } else {
-                        body.add(makecell("", new Color(0xbfecac)));
-                    }
+            JPanel debitColumn = column(Theme.DEBIT_BG);
+            for (Double debit : accountTitle.getDebitValues()) {
+                debitColumn.add(makecell(Theme.money(debit)));
+            }
+            JPanel creditColumn = column(Theme.CREDIT_BG);
+            for (Double credit : accountTitle.getCreditValues()) {
+                creditColumn.add(makecell(Theme.money(credit)));
+            }
 
-                    // Credit cell
-                    if (i < accountTitle.getCreditValues().size()) {
-                        body.add(makecell(String.valueOf(accountTitle.getCreditValues().get(i)), new Color(0xff7d7d)));
-                    } else {
-                        body.add(makecell("", new Color(0xff7d7d)));
-                    }
-                }
-
+            JPanel body = new JPanel(new GridLayout(1, 2));
+            body.add(debitColumn);
+            body.add(creditColumn);
             tAccount.add(body, BorderLayout.CENTER);
 
-            JLabel endingBalance = new JLabel("EB: " + String.valueOf(accountTitle.computeEndingBal()));
-            endingBalance.setOpaque(true);
-            endingBalance.setFont(poppins1);
-            endingBalance.setPreferredSize(new Dimension(150,25));
-            endingBalance.setBackground(Color.YELLOW);
+            JLabel eb = new JLabel("EB:");
+            eb.setFont(Theme.inter(Font.BOLD, 12f));
+            eb.setForeground(Color.WHITE);
+            JLabel endingBalance = new JLabel(Theme.money(accountTitle.computeEndingBal()));
+            endingBalance.setFont(Theme.mono(Font.BOLD, 12f));
+            endingBalance.setForeground(Color.WHITE);
 
+            JPanel footer = new JPanel(new BorderLayout(10, 0));
+            footer.setBackground(Theme.BLUE);
+            footer.setPreferredSize(new Dimension(250, 40));
+            footer.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 20));
+            footer.add(eb, BorderLayout.WEST);
             if (accountTitle.getSide().equals("Debit")) {
-                endingBalance.setHorizontalAlignment(SwingConstants.LEFT);
+                footer.add(endingBalance, BorderLayout.CENTER);
             }else{
                 endingBalance.setHorizontalAlignment(SwingConstants.RIGHT);
+                footer.add(endingBalance, BorderLayout.CENTER);
             }
-            tAccount.add(endingBalance, BorderLayout.SOUTH);
+            tAccount.add(footer, BorderLayout.SOUTH);
         return tAccount;
     }
 
-    public static JLabel makecell(String value, Color color){
+    private static JPanel column(Color color){
+        JPanel column = new JPanel();
+        column.setLayout(new BoxLayout(column, BoxLayout.Y_AXIS));
+        column.setBackground(color);
+        column.setBorder(BorderFactory.createEmptyBorder(10, 0, 6, 0));
+        return column;
+    }
+
+    public static JLabel makecell(String value){
         JLabel cell = new JLabel(value, SwingConstants.CENTER);
-        cell.setOpaque(true);
-        cell.setBackground(color);
-        cell.setFont(poppins2);
-        cell.setBorder(BorderFactory.createLineBorder(Color.WHITE, 1));
+        cell.setFont(Theme.mono(Font.BOLD, 13f));
+        cell.setForeground(Theme.INK);
+        cell.setAlignmentX(Component.CENTER_ALIGNMENT);
+        cell.setMaximumSize(new Dimension(Integer.MAX_VALUE, 26));
+        cell.setPreferredSize(new Dimension(100, 26));
         return cell;
     }
 

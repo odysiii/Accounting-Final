@@ -4,19 +4,15 @@ import java.awt.*;
 import javax.swing.*;
 
 
-public class Journal extends TabFrame{
+public class Journal extends JPanel{
 
   public Journal(Journalizing journalizing){
 
-    super("Journal", journalizing);
-    for (JButton button : this.getAllButtons()) {
-      button.addActionListener(e -> this.dispose());
-    }
-    this.removeActionListener(getJournalTab());
+    setOpaque(false);
+    setLayout(new BorderLayout());
+    setBorder(Theme.pagePad());
 
-    JScrollPane scrollPane = new JScrollPane(journalizing.getJournalTable());
+    add(new JournalGrid(journalizing.getModel()).toCard(), BorderLayout.CENTER);
 
-    add(scrollPane, BorderLayout.CENTER);
-    
   }
 }

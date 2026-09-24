@@ -1,4 +1,0 @@
-09/20,Cash,1000.0,Capital,1000.0,Initial Investment
-09/21,Cost of Goods Sold,1000.0,Inventories,1000.0,To record cost of goods sold
-09/21,Cash,2000.0,Sales,2000.0,First Sale
-09/22,Cash,1000.0,Capital,1000.0,2nd INvestment

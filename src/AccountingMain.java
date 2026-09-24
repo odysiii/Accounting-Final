@@ -1,10 +1,11 @@
-import UI.HomeFrame;
+import UI.AppFrame;
 
-public class AccountingMain { 
- 
+public class AccountingMain {
+
     @SuppressWarnings("unused")
-    
+
     public static void main(String[] args) throws Exception {
-        HomeFrame home = new HomeFrame();
+        AppFrame app = new AppFrame();
+        app.setVisible(true);
     }
 }

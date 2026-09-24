@@ -1,7 +1,6 @@
 package UI;
 
 import java.awt.*;
-import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.*;
@@ -9,120 +8,111 @@ import javax.swing.*;
 import Backend.JournalEntry;
 import Backend.Ledger;
 
-public class SavingJournals extends JFrame{
+public class SavingJournals extends ModalCard {
 
-    private static Font lexend = loadFont(GetPath.getPath() + "Lexend-VariableFont_wght.ttf", 20f);
-    private static Font poppins = loadFont(GetPath.getPath() + "Poppins-Bold.ttf", 25f);
-    private static Font poppins1 = loadFont(GetPath.getPath() + "Poppins-Medium.ttf", 15f);
-    
-
-    public static Font loadFont(String path, float size) {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            return font;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; 
-        }
-    }
-
-    
     private static String fileName;
 
-   @SuppressWarnings("unused")
-    public SavingJournals(ArrayList<JournalEntry> Entries, Journalizing journalizing) {
+   public SavingJournals(ArrayList<JournalEntry> Entries, Journalizing journalizing) {
 
-        super("Saving Journal");
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
-        setSize(650, 350);
-        setResizable(false);
-        setLocationRelativeTo(null);
+        super(SwingUtilities.getWindowAncestor(journalizing), "Saving Journal", 470, 310, 56);
 
-        //Blue
-        JPanel TitlePanel = new JPanel();
-        TitlePanel.setBackground(new Color(0, 37, 204));
-        TitlePanel.setPreferredSize(new Dimension(700, 48)); 
-        TitlePanel.setLayout(new BorderLayout());
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createEmptyBorder(30, 34, 28, 34));
 
-        //Sky Blue
-        JPanel ContentPanel = new JPanel();
-        ContentPanel.setBackground(new Color(125, 216, 255));
-        ContentPanel.setPreferredSize(new Dimension(700, 250));
-        ContentPanel.setLayout(null);
+        JLabel title = new JLabel("Save Journal");
+        title.setFont(Theme.interWeight("ExtraBold", 24f));
+        title.setForeground(Theme.INK);
 
-        add(TitlePanel, BorderLayout.NORTH);
-        add(ContentPanel); 
+        JLabel subtitle = new JLabel("Enter a file name to store this journal");
+        subtitle.setFont(Theme.inter(Font.BOLD, 12f));
+        subtitle.setForeground(Theme.HINT);
 
-        //Saving Journal in Files...
-        JLabel TitleLabel = new JLabel();
-        TitleLabel.setText("  SAVING JOURNAL IN FILES...");
-        TitleLabel.setForeground(Color.WHITE);
-        TitleLabel.setFont(poppins);
-        TitleLabel.setHorizontalAlignment(SwingConstants.LEFT);
-        TitlePanel.add(TitleLabel, BorderLayout.CENTER);
+        JPanel titleText = new JPanel();
+        titleText.setOpaque(false);
+        titleText.setLayout(new BoxLayout(titleText, BoxLayout.Y_AXIS));
+        titleText.add(title);
+        titleText.add(Box.createVerticalStrut(4));
+        titleText.add(subtitle);
 
-        //Input File Name:
-        JLabel InputFN = new JLabel();
-        InputFN.setText("  Input File Name: ");
-        InputFN.setForeground(Color.BLACK);
-        InputFN.setFont(lexend);
-        InputFN.setHorizontalAlignment(SwingConstants.LEFT);
-        InputFN.setBounds(36, 50, 200, 30);
-        ContentPanel.add(InputFN);
-        
-        //TextBox
+        JPanel titleRow = new JPanel(new BorderLayout());
+        titleRow.setOpaque(false);
+        titleRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 60));
+        titleRow.add(titleText, BorderLayout.CENTER);
+        JPanel closeHolder = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        closeHolder.setOpaque(false);
+        closeHolder.add(closeButton());
+        titleRow.add(closeHolder, BorderLayout.EAST);
+
+        JLabel inputFN = new JLabel("Input File Name");
+        inputFN.setFont(Theme.inter(Font.BOLD, 12f));
+        inputFN.setForeground(Theme.INK);
+        inputFN.setAlignmentX(Component.LEFT_ALIGNMENT);
+
         RoundedTextField fileNameField = new RoundedTextField();
-        fileNameField.setBounds(42, 82, 537, 50); 
-        fileNameField.setCornerRadius(10);
-        ContentPanel.add(fileNameField);
-
-        //Buttons
-        JPanel ButtonsPanel = new JPanel();
-        ButtonsPanel.setBackground(new Color(125, 216, 255));
-        ButtonsPanel.setPreferredSize(new Dimension(700, 100));
-        add(ButtonsPanel, BorderLayout.SOUTH);
+        fileNameField.setBackgroundColor(Theme.FIELD_BLUSH);
+        fileNameField.setCornerRadius(44);
+        fileNameField.setPlaceholder("e.g., Bianca Corp.");
+        fileNameField.setAlignmentX(Component.LEFT_ALIGNMENT);
+        fileNameField.setPreferredSize(new Dimension(0, 50));
+        fileNameField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
 
         //Save Button
         RoundedButton saveButton = new RoundedButton();
         saveButton.setText("Save");
-        saveButton.setCornerRadius(25);
-        saveButton.setForeground(Color.WHITE);
-        saveButton.setPreferredSize(new Dimension(170, 40)); 
-        saveButton.setFont(poppins1);
-        saveButton.setFocusable(false); 
+        saveButton.setCornerRadius(60);
+        saveButton.setFont(Theme.inter(Font.BOLD, 13f));
+        Theme.stylePrimary(saveButton);
         saveButton.addActionListener(e -> {
-            fileName = fileNameField.getText();
+            if (fileNameField.getText().trim().isEmpty()) {
+                fileNameField.setError(true);
+                return;
+            }
+            fileName = fileNameField.getText().trim();
             Ledger.makeLedgers(Entries, Ledger.getUnAdjustedAccounts());
-            new LedgersFrame(Ledger.getUnAdjustedAccounts(), journalizing);
             Ledger.writeCsvFile(fileName);
             Ledger.writeFormattedFile(fileName);
             this.dispose();
+            AppFrame.get().markSaved();
+            AppFrame.get().showTab(AppFrame.Tab.LEDGERS);
         });
 
         //Cancel Button
         RoundedButton cancelButton = new RoundedButton();
         cancelButton.setText("Cancel");
-        cancelButton.setCornerRadius(25);
-        cancelButton.setForeground(Color.WHITE);
-        cancelButton.setPreferredSize(new Dimension(170, 40)); 
-        cancelButton.setFont(poppins1);
-        cancelButton.setFocusable(false); 
+        cancelButton.setCornerRadius(60);
+        cancelButton.setFont(Theme.inter(Font.BOLD, 13f));
+        Theme.styleSecondary(cancelButton);
         cancelButton.addActionListener(e -> {
             Ledger.makeLedgers(Entries, Ledger.getUnAdjustedAccounts());
-            new LedgersFrame(Ledger.getUnAdjustedAccounts(), journalizing);
             this.dispose();
+            AppFrame.get().showTab(AppFrame.Tab.LEDGERS);
         });
 
-        ButtonsPanel.add(saveButton);
-        ButtonsPanel.add(cancelButton);
+        JPanel buttons = new JPanel(new GridLayout(1, 2, 14, 0));
+        buttons.setOpaque(false);
+        buttons.setAlignmentX(Component.LEFT_ALIGNMENT);
+        buttons.setPreferredSize(new Dimension(0, 50));
+        buttons.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        buttons.add(saveButton);
+        buttons.add(cancelButton);
 
-    
-        setVisible(true);
+        card.add(titleRow);
+        card.add(Box.createVerticalStrut(24));
+        card.add(inputFN);
+        card.add(Box.createVerticalStrut(8));
+        card.add(fileNameField);
+        card.add(Box.createVerticalGlue());
+        card.add(buttons);
+
+        getRootPane().setDefaultButton(saveButton);
     }
 
     public static String getFileName() {
       return fileName;
+    }
+
+    public static void reset() {
+      fileName = null;
     }
 }

@@ -1,98 +1,119 @@
 package UI;
 import java.awt.*;
-import java.io.File;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 
-public class HomeFrame extends Frame {
+public class HomeFrame extends JPanel {
 
-    private static Font lexend = loadFont(GetPath.getPath() + "Lexend-VariableFont_wght.ttf", 30f);
-    private static Font poppins = loadFont(GetPath.getPath() + "Poppins-ExtraBold.ttf", 100f);
-
-    private static int done = 0;
-    @SuppressWarnings("unused")
     public HomeFrame() {
 
-        super("Home");
-        Border border = BorderFactory.createLineBorder(Color.gray, 2);
-
-
-        JPanel header = new JPanel();
-        header.setPreferredSize(new Dimension(0, 50));
-        header.setBorder(border);
+        setOpaque(false);
+        setLayout(new GridBagLayout());
 
         JPanel center = new JPanel();
+        center.setOpaque(false);
         center.setLayout(new BoxLayout(center, BoxLayout.Y_AXIS));
-        center.setBackground(new Color(0x7DD8FF));
-        
-        JLabel title = new JLabel("ACCOUNTING CYCLE");
-        title.setFont(poppins);
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        title.setForeground(Color.black);
 
+        JLabel subtitleOne = subtitle("Streamline journal entries, ledger postings, trial balances, and audit-ready");
+        JLabel subtitleTwo = subtitle("financial reporting in one seamless, intelligent workspace.");
+
+        int shadow = 9;
 
         RoundedButton createNewJournal = new RoundedButton();
-        createNewJournal.setFillOriginal(new Color(0x42A5F5));   //orig
-        createNewJournal.setFillOver(new Color(0x1E88E5));    //hover   
-        createNewJournal.setFillClick(new Color(0xBBDEFB));  //click 
-        createNewJournal.setCornerRadius(40);
         createNewJournal.setText("Create New Journal");
-        createNewJournal.setFont(lexend);
-        createNewJournal.setMaximumSize(new Dimension(700, 100));
-        createNewJournal.setAlignmentX(Component.CENTER_ALIGNMENT);
-        createNewJournal.setBackground(Color.WHITE);
-        createNewJournal.setForeground(Color.black);
-        createNewJournal.setFocusable(false);
-        createNewJournal.addActionListener(e -> {
-            new CompanyName();
-        });
+        createNewJournal.setIcon(Icons.get(Icons.Type.PLUS_CIRCLE, 24, Color.WHITE));
+        createNewJournal.setFont(Theme.inter(Font.BOLD, 16f));
+        createNewJournal.setCornerRadius(16);
+        Theme.stylePrimary(createNewJournal);
+        createNewJournal.setShadowSize(shadow);
+        createNewJournal.setPreferredSize(new Dimension(266 + 2 * shadow, 60 + 2 * shadow));
+        createNewJournal.addActionListener(e -> AppFrame.get().startNewJournal());
 
         RoundedButton viewSavedJournals = new RoundedButton();
-        viewSavedJournals.setFillOriginal(new Color(0x42A5F5));   //orig
-        viewSavedJournals.setFillOver(new Color(0x1E88E5));    //hover   
-        viewSavedJournals.setFillClick(new Color(0xBBDEFB));  //click 
-        viewSavedJournals.setCornerRadius(40);
         viewSavedJournals.setText("View Saved Journals");
-        viewSavedJournals.setFont(lexend);
-        viewSavedJournals.setMaximumSize(new Dimension(700, 100));
-        viewSavedJournals.setAlignmentX(Component.CENTER_ALIGNMENT);
-        viewSavedJournals.setBackground(Color.WHITE);
-        viewSavedJournals.setForeground(Color.black);
+        viewSavedJournals.setIcon(Icons.get(Icons.Type.LIST, 24, Theme.BLUE));
+        viewSavedJournals.setFont(Theme.inter(Font.BOLD, 16f));
+        viewSavedJournals.setCornerRadius(16);
+        viewSavedJournals.setFillOriginal(Color.WHITE);
+        viewSavedJournals.setFillOver(new Color(0xF1F5FD));
+        viewSavedJournals.setFillClick(new Color(0xDDE7FA));
+        viewSavedJournals.setForeground(Theme.BLUE);
         viewSavedJournals.setFocusable(false);
-        viewSavedJournals.addActionListener(e -> {
-            new ViewSavedJournals(); 
-            this.dispose();
-        });
+        viewSavedJournals.setBorderColor(new Color(0xD5D9E2));
+        viewSavedJournals.setShadowSize(shadow);
+        viewSavedJournals.setPreferredSize(new Dimension(266 + 2 * shadow, 60 + 2 * shadow));
+        viewSavedJournals.addActionListener(e -> AppFrame.get().goSaved());
 
-        center.add(Box.createVerticalStrut(60));
-        center.add(title);
-        center.add(Box.createVerticalStrut(40));
-        center.add(createNewJournal);
-        center.add(Box.createVerticalStrut(40));
-        center.add(viewSavedJournals);
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 14, 0));
+        buttons.setOpaque(false);
+        buttons.add(createNewJournal);
+        buttons.add(viewSavedJournals);
 
-        this.add(header, BorderLayout.NORTH);
-        this.add(center, BorderLayout.CENTER);
+        center.add(new Hero());
+        center.add(Box.createVerticalStrut(30));
+        center.add(subtitleOne);
+        center.add(Box.createVerticalStrut(6));
+        center.add(subtitleTwo);
+        center.add(Box.createVerticalStrut(52));
+        center.add(buttons);
 
-        this.repaint();
-        this.revalidate();
+        add(center);
     }
 
-    public static Font loadFont(String path, float size) {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            return font;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; 
+    private JLabel subtitle(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(Theme.inter(Font.PLAIN, 20f));
+        label.setForeground(new Color(0x8A858E));
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        return label;
+    }
+
+    // "Master Your Financial Workflow with Accounting Cycle", the last two words in blue.
+    private static class Hero extends JComponent {
+
+        private static final Color FROM = new Color(0x2B86F5);
+        private static final Color TO = new Color(0x0050D8);
+
+        Hero() {
+            setFont(Theme.interWeight("ExtraBold", 68f));
+            setAlignmentX(Component.CENTER_ALIGNMENT);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(900, 228);
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = Theme.aa(g);
+            g2.setFont(getFont());
+            FontMetrics fm = g2.getFontMetrics();
+            int lineHeight = 76;
+            int baseline = fm.getAscent() + 4;
+
+            drawCentered(g2, fm, baseline, "Master Your Financial", null);
+            drawCentered(g2, fm, baseline + lineHeight, "Workflow with ", "Accounting");
+            drawCentered(g2, fm, baseline + 2 * lineHeight, null, "Cycle");
+            g2.dispose();
+        }
+
+        private void drawCentered(Graphics2D g2, FontMetrics fm, int y, String black, String blue) {
+            int blackWidth = black == null ? 0 : fm.stringWidth(black);
+            int blueWidth = blue == null ? 0 : fm.stringWidth(blue);
+            int x = (getWidth() - blackWidth - blueWidth) / 2;
+            if (black != null) {
+                g2.setColor(Theme.INK);
+                g2.drawString(black, x, y);
+            }
+            if (blue != null) {
+                Theme.gradientText(g2, blue, x + blackWidth, y, FROM, TO);
+            }
         }
     }
-
-    public static int getDone() {
-      return done;
-    }
-
-
 }

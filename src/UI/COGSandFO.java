@@ -1,89 +1,95 @@
 package UI;
 
 import java.awt.*;
-import java.io.File;
 
 import javax.swing.*;
 
-public class COGSandFO extends JDialog{
-
-    private static Font poppins = loadFont(GetPath.getPath() + "Poppins-Medium.ttf", 15f);
+public class COGSandFO extends ModalCard {
 
     private static double cogs;
     private static double freightOut;
 
-    public COGSandFO(JFrame parent) {
-        
-        super(parent, "Enter Cogs", true);
+    public COGSandFO(Component parent) {
 
-        this.setLayout(new BorderLayout());
-        this.setSize(350, 420);
-        this.setResizable(false);
-        this.setLocationRelativeTo(null);
+        super(SwingUtilities.getWindowAncestor(parent), "Enter Cogs", 400, 330, 30);
 
-        //Blue
-        JPanel TitlePanel = new JPanel();
-        TitlePanel.setBackground(new Color(0, 37, 204));
-        TitlePanel.setPreferredSize(new Dimension(700, 55)); 
-        TitlePanel.setLayout(new BorderLayout());
+        card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
+        card.setBorder(BorderFactory.createEmptyBorder(26, 30, 28, 30));
 
-        //Sky Blue
-        JPanel ContentPanel = new JPanel();
-        ContentPanel.setBackground(new Color(125, 216, 255));
-        ContentPanel.setPreferredSize(new Dimension(700, 250));
-        ContentPanel.setLayout(null);
+        JLabel title = new JLabel("Input COGS");
+        title.setFont(Theme.interWeight("ExtraBold", 22f));
+        title.setForeground(Theme.INK);
 
-        add(TitlePanel, BorderLayout.NORTH);
-        add(ContentPanel); 
+        JPanel titleRow = new JPanel(new BorderLayout());
+        titleRow.setOpaque(false);
+        titleRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        titleRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
+        titleRow.add(title, BorderLayout.CENTER);
+        titleRow.add(closeButton(), BorderLayout.EAST);
 
-        JLabel InputCOGS = new JLabel();
-        InputCOGS.setText("Input Cost of Goods Sold: ");
-        InputCOGS.setFont(poppins); 
-        InputCOGS.setForeground(Color.BLACK);
-        InputCOGS.setHorizontalAlignment(SwingConstants.LEFT);
-        InputCOGS.setBounds(43, 47, 200, 30);
-        ContentPanel.add(InputCOGS);
-                        
-        //TextBox
-        RoundedTextField COGSField = new RoundedTextField();
-        COGSField.setBounds(42, 79, 242, 30); // <-- adjusted to fit frame
-        COGSField.setCornerRadius(15);
-        ContentPanel.add(COGSField);
-        
+        RoundedTextField COGSField = field();
+        RoundedTextField FOField = field();
 
-        JLabel InputFO = new JLabel();
-        InputFO.setText("Input Freight out: ");
-        InputFO.setFont(poppins); 
-        InputFO.setForeground(Color.BLACK);
-        InputFO.setHorizontalAlignment(SwingConstants.LEFT);
-        InputFO.setBounds(43, 147, 200, 30);
-        ContentPanel.add(InputFO);
-
-        RoundedTextField FOField = new RoundedTextField();
-        FOField.setBounds(42, 182, 239, 30); // <-- adjusted to fit frame
-        FOField.setCornerRadius(15);
-        ContentPanel.add(FOField);
-
-        JPanel ButtonsPanel = new JPanel();
-        ButtonsPanel.setBackground(new Color(125, 216, 255));
-        ButtonsPanel.setPreferredSize(new Dimension(700, 75));
-        add(ButtonsPanel, BorderLayout.SOUTH);
-
-        //Save Button
         RoundedButton confirm = new RoundedButton();
         confirm.setText("Confirm");
-        confirm.setPreferredSize(new Dimension(150, 32)); 
-        confirm.setFont(poppins); 
-        confirm.setForeground(Color.WHITE);
-        confirm.setCornerRadius(15);
-        confirm.setFocusable(false); 
+        confirm.setCornerRadius(16);
+        confirm.setFont(Theme.inter(Font.BOLD, 14f));
+        Theme.stylePrimary(confirm);
+        confirm.setPreferredSize(new Dimension(250, 44));
         confirm.addActionListener(e -> {
-            cogs = Double.valueOf(COGSField.getText());
-            freightOut = Double.valueOf(FOField.getText());
+            try {
+                cogs = Double.valueOf(COGSField.getText().trim().replace(",", ""));
+            } catch (NumberFormatException ex) {
+                COGSField.setError(true);
+                return;
+            }
+            String freight = FOField.getText().trim().replace(",", "");
+            try {
+                freightOut = freight.isEmpty() ? 0 : Double.valueOf(freight);
+            } catch (NumberFormatException ex) {
+                FOField.setError(true);
+                return;
+            }
             this.dispose();
         });
-        ButtonsPanel.add(confirm);
 
+        card.add(titleRow);
+        card.add(Box.createVerticalStrut(20));
+        card.add(label("Input Cost of Goods Sold"));
+        card.add(Box.createVerticalStrut(8));
+        card.add(COGSField);
+        card.add(Box.createVerticalStrut(18));
+        card.add(label("Input Freight Out"));
+        card.add(Box.createVerticalStrut(8));
+        card.add(FOField);
+        card.add(Box.createVerticalGlue());
+
+        JPanel confirmRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        confirmRow.setOpaque(false);
+        confirmRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        confirmRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        confirmRow.add(confirm);
+        card.add(confirmRow);
+
+        getRootPane().setDefaultButton(confirm);
+    }
+
+    private JLabel label(String text) {
+        JLabel label = new JLabel(text);
+        label.setFont(Theme.inter(Font.BOLD, 13f));
+        label.setForeground(Theme.INK);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return label;
+    }
+
+    private RoundedTextField field() {
+        RoundedTextField field = new RoundedTextField();
+        field.setBackgroundColor(new Color(0xDDDDDD));
+        field.setCornerRadius(16);
+        field.setAlignmentX(Component.LEFT_ALIGNMENT);
+        field.setPreferredSize(new Dimension(0, 46));
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+        return field;
     }
 
     public static double getCogs() {
@@ -93,16 +99,9 @@ public class COGSandFO extends JDialog{
       return freightOut;
     }
 
-    public static Font loadFont(String path, float size) {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            return font;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; 
-        }
+    public static void reset() {
+      cogs = 0;
+      freightOut = 0;
     }
-
 
 }

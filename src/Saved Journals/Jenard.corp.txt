@@ -1,0 +1,18 @@
+DATE       ACCOUNT TITLES                                               DEBIT          CREDIT
+---------------------------------------------------------------------------------------------
+09/20      Cash                                                       1000.00                
+                Capital                                                               1000.00
+                     Capital                                 
+
+           Cost of Goods Sold                                          400.00                
+                Inventories                                                            400.00
+                     To record cost of goods sold            
+
+           Cash                                                       1000.00                
+                Sales                                                                 1000.00
+                     To record sales                         
+
+09/21      Inventories                                                1000.00                
+                Cash                                                                  1000.00
+                     Record supplies                         
+

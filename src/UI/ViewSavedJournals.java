@@ -6,156 +6,129 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-
-import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicScrollBarUI;
-
-import Backend.Ledger;
+import java.util.Arrays;
 
 
-public class ViewSavedJournals {
+public class ViewSavedJournals extends JPanel {
 
-    private static Font poppins = loadFont(GetPath.getPath() + "Poppins-Medium.ttf", 15f);
-    private static Font lexend = loadFont(GetPath.getPath() + "Lexend-VariableFont_wght.ttf", 20f);
-    private static Font anton = loadFont(GetPath.getPath() + "Anton-Regular.ttf", 70f);
-    
-    private static File folder = new File(GetPath.getCsvPath());
-    private static File[] csvFiles = folder.listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
     public ViewSavedJournals() {
 
-        Border border = BorderFactory.createLineBorder(Color.gray, 2);
+        setOpaque(false);
+        setLayout(new BorderLayout());
 
-        JFrame SavedJournals_frame = new JFrame();
-        SavedJournals_frame.setVisible(true);
-        SavedJournals_frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        SavedJournals_frame.setLayout(new BorderLayout());
-        
-        JPanel header = new JPanel();
-
-        header.setPreferredSize(new Dimension(0, 50));
-        header.setBorder(border);
-
-        JPanel center = new JPanel();
-        center.setLayout(new BorderLayout());
-
-
-        JLabel SavedJournals_label = new JLabel("SAVED JOURNALS");
-        SavedJournals_label.setFont(anton);
-        SavedJournals_label.setForeground(Color.BLACK);
-        SavedJournals_label.setBackground(Color.red);
-        SavedJournals_label.setHorizontalAlignment(SwingConstants.LEFT);
-        SavedJournals_label.setBorder(BorderFactory.createEmptyBorder(20, 50, 20, 0));
-
-        JPanel Files_panel = new JPanel();
-        Files_panel.setLayout(new BoxLayout(Files_panel, BoxLayout.Y_AXIS));
-        Files_panel.setBorder(BorderFactory.createEmptyBorder(0, 50, 0, 50));
+        JPanel Files_panel = new ScrollPanel(new ScrollPanel.WrapLayout(FlowLayout.LEFT, 24, 24));
+        Files_panel.setBorder(BorderFactory.createEmptyBorder(24, 36, 24, 36));
 
         JScrollPane scrollPane = new JScrollPane(Files_panel);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(11, 0));
-        
-        scrollPane.getVerticalScrollBar().setUI(new BasicScrollBarUI() {
-    
-        protected void configureScrollBarColors() {
-        this.thumbColor = new Color(211, 211, 211); // scroller color
-        }
+        Theme.slim(scrollPane);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        @Override
-        protected void paintThumb(Graphics g, JComponent c, Rectangle thumbBounds) {
-        Graphics2D g2 = (Graphics2D) g.create();
-        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2.setColor(thumbColor);
-        g2.fillRoundRect(thumbBounds.x, thumbBounds.y, thumbBounds.width, thumbBounds.height, 10, 10);
-        g2.dispose();
+        File[] csvFiles = new File(GetPath.getCsvPath()).listFiles((dir, name) -> name.toLowerCase().endsWith(".txt"));
+        if (csvFiles == null) {
+            csvFiles = new File[0];
         }
-
-        @Override
-        protected JButton createDecreaseButton(int orientation) {
-        JButton button = super.createDecreaseButton(orientation);
-        button.setBackground(new Color(245, 245, 245));  // arrow
-        return button;
-        }
-
-        @Override
-        protected JButton createIncreaseButton(int orientation) {
-        JButton button = super.createIncreaseButton(orientation);
-        button.setBackground(new Color(245, 245, 245));
-        return button;
-        }
-
-        });
+        Arrays.sort(csvFiles);
 
         for (File csvFile : csvFiles) {
 
             String fileName = csvFile.getName();
             String shortenFileName = fileName.replace(".txt", "");
-
-            RoundedPanel files = new RoundedPanel();
-            files.setLayout(new BorderLayout());
-            files.setBackground(new Color(125,216,255));
-            files.setPreferredSize(new Dimension(1200, 85));
-            files.setCornerRadius(20);
-            files.setMaximumSize(new Dimension(Integer.MAX_VALUE, 85));
-            files.setBorder(BorderFactory.createEmptyBorder(23, 5, 23, 30));
-
-            RoundedPanel buttonPanel = new RoundedPanel();
-            buttonPanel.setLayout(new BorderLayout());
-            buttonPanel.setBackground(new Color(125,216,255));
-
-            RoundedButton openButton = new RoundedButton();
-            openButton.setText("OPEN");
-            openButton.setFont(poppins);
-            openButton.setForeground(Color.WHITE);
-            openButton.setCornerRadius(45);
-            openButton.setPreferredSize(new Dimension(100,80));
-            openButton.setMaximumSize(new Dimension(50,80));
-            openButton.setFocusable(false);
-            openButton.setBackground(Color.WHITE);
-            openButton.setFont(lexend);
-            openButton.addActionListener(e -> {
-                System.out.println("File Name: " + fileName);
-                Journalizing journalizing = new Journalizing(fileName);
-                journalizing.setVisible(false);
-                Ledger.makeLedgers(Ledger.getUnAdjustedEntries(), Ledger.getUnAdjustedAccounts());
-                new LedgersFrame(Ledger.getUnAdjustedAccounts(), journalizing);
-                SavedJournals_frame.dispose();
-            });
-
-            JLabel filename = new JLabel(shortenFileName);
-            filename.setFont(lexend);
-            filename.setBorder(BorderFactory.createEmptyBorder(30, 20, 30, 30));
-            filename.setForeground(Color.BLACK);
-
-            buttonPanel.add(openButton, BorderLayout.WEST);
-
-            files.add(buttonPanel, BorderLayout.EAST);
-            files.add(filename, BorderLayout.WEST);
-
-            Files_panel.add(files);
-            Files_panel.add(Box.createVerticalStrut(10));
+            Files_panel.add(makeCard(fileName, shortenFileName));
         }
 
-        center.add(SavedJournals_label, BorderLayout.NORTH);
-        center.add(scrollPane, BorderLayout.CENTER);
-        
-        
-        SavedJournals_frame.add(header, BorderLayout.NORTH);
-        SavedJournals_frame.add(center, BorderLayout.CENTER);
+        if (csvFiles.length == 0) {
+            JLabel empty = new JLabel("No saved journals yet.");
+            empty.setFont(Theme.inter(Font.PLAIN, 16f));
+            empty.setForeground(Theme.GRAY_TEXT);
+            Files_panel.add(empty);
+        }
 
-        SavedJournals_frame.repaint();
-        SavedJournals_frame.revalidate();
-
+        add(scrollPane, BorderLayout.CENTER);
     }
 
-    public static Font loadFont(String path, float size) {
-        try {
-            Font font = Font.createFont(Font.TRUETYPE_FONT, new File(path)).deriveFont(size);
-            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
-            return font;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null; 
-        }
+    private RoundedPanel makeCard(String fileName, String shortenFileName) {
+        int shadow = 10;
+
+        RoundedPanel files = new RoundedPanel();
+        files.setLayout(new BorderLayout());
+        files.setBackground(Color.WHITE);
+        files.setCornerRadius(34);
+        files.setShadowSize(shadow);
+        files.setAccent(Theme.BLUE, 9);
+        files.setAccentSide(RoundedPanel.LEFT);
+        files.setClipChildren(true);
+        files.setBorder(BorderFactory.createEmptyBorder(16, 18, 16, 16));
+        files.setPreferredSize(new Dimension(270 + 2 * shadow, 160 + 2 * shadow));
+
+        RoundedPanel iconBox = new RoundedPanel();
+        iconBox.setBackground(new Color(0xC9DBF6));
+        iconBox.setCornerRadius(16);
+        iconBox.setLayout(new GridBagLayout());
+        iconBox.setPreferredSize(new Dimension(44, 44));
+        iconBox.add(new JLabel(Icons.get(Icons.Type.BUILDING, 26, new Color(0x8FB0E8))));
+
+        RoundedButton deleteButton = new RoundedButton();
+        deleteButton.setIcon(Icons.get(Icons.Type.TRASH, 16, Color.WHITE));
+        deleteButton.setCornerRadius(32);
+        deleteButton.setPreferredSize(new Dimension(32, 32));
+        Theme.stylePrimary(deleteButton);
+        deleteButton.addActionListener(e -> {
+            int answer = JOptionPane.showConfirmDialog(this, "Delete \"" + shortenFileName + "\"? This cannot be undone.",
+                    "Delete Journal", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+            if (answer == JOptionPane.YES_OPTION) {
+                new File(GetPath.getCsvPath() + fileName).delete();
+                new File(GetPath.getFormatPath() + fileName).delete();
+                AppFrame.get().refreshSaved();
+            }
+        });
+
+        JPanel deleteHolder = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        deleteHolder.setOpaque(false);
+        deleteHolder.add(deleteButton);
+
+        JPanel iconHolder = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        iconHolder.setOpaque(false);
+        iconHolder.add(iconBox);
+
+        JPanel topRow = new JPanel(new BorderLayout());
+        topRow.setOpaque(false);
+        topRow.add(iconHolder, BorderLayout.WEST);
+        topRow.add(deleteHolder, BorderLayout.EAST);
+        topRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        topRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
+
+        JLabel filename = new JLabel(shortenFileName);
+        filename.setFont(Theme.interWeight("SemiBold", 15f));
+        filename.setForeground(Theme.INK);
+        filename.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        RoundedButton openButton = new RoundedButton();
+        openButton.setText("Open Journal");
+        openButton.setIcon(Icons.get(Icons.Type.ARROW, 16, Color.WHITE));
+        openButton.setHorizontalTextPosition(SwingConstants.LEFT);
+        openButton.setIconTextGap(8);
+        openButton.setFont(Theme.inter(Font.BOLD, 12f));
+        openButton.setCornerRadius(12);
+        Theme.stylePrimary(openButton);
+        openButton.setAlignmentX(Component.LEFT_ALIGNMENT);
+        openButton.setPreferredSize(new Dimension(0, 34));
+        openButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, 34));
+        openButton.addActionListener(e -> {
+            System.out.println("File Name: " + fileName);
+            AppFrame.get().openSavedJournal(fileName);
+        });
+
+        JPanel content = new JPanel();
+        content.setOpaque(false);
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.add(topRow);
+        content.add(Box.createVerticalStrut(10));
+        content.add(filename);
+        content.add(Box.createVerticalGlue());
+        content.add(openButton);
+        files.add(content, BorderLayout.CENTER);
+
+        return files;
     }
 
    public static ArrayList<String[]> loadFiles(String fileName) {
@@ -165,7 +138,7 @@ public class ViewSavedJournals {
         try (BufferedReader reader = new BufferedReader(new FileReader(path))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                allDetails.add(line.split(",")); 
+                allDetails.add(line.split(","));
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -176,5 +149,3 @@ public class ViewSavedJournals {
 
 
 }
-  
-

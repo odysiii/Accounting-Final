@@ -1,0 +1,4 @@
+09/20,Cash,1000.0,Capital,1000.0,Capital
+,Cost of Goods Sold,400.0,Inventories,400.0,To record cost of goods sold
+,Cash,1000.0,Sales,1000.0,To record sales
+09/21,Inventories,1000.0,Cash,1000.0,Record supplies
